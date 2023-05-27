@@ -1,0 +1,114 @@
+#include <iostream>
+#include <stack>
+#include <string>
+#include <sstream>
+
+using namespace std;
+
+
+bool isOperator(char c) {
+    return c == '+' || c == '-' || c == '*' || c == '/';
+}
+
+
+int getPriority(char op) {
+    if (op == '*' || op == '/')
+        return 2;
+    else if (op == '+' || op == '-')
+        return 1;
+    else
+        return 0;
+}
+
+int performOperation(char op, int operand1, int operand2) {
+    switch (op) {
+        case '+':
+            return operand1 + operand2;
+        case '-':
+            return operand1 - operand2;
+        case '*':
+            return operand1 * operand2;
+        case '/':
+            return operand1 / operand2;
+        default:
+            return 0;
+    }
+}
+
+int evaluateExpression(const string& expression) {
+    stack<int> operandStack;
+    stack<char> operatorStack;
+
+    istringstream iss(expression);
+    string token;
+
+    while (iss >> token) {
+        if (isdigit(token[0])) {
+            int operand = stoi(token);
+            operandStack.push(operand);
+        } else if (token[0] == '(') {
+            operatorStack.push('(');
+        } else if (token[0] == ')') {
+            while (!operatorStack.empty() && operatorStack.top() != '(') {
+                char op = operatorStack.top();
+                operatorStack.pop();
+
+                int operand2 = operandStack.top();
+                operandStack.pop();
+                int operand1 = operandStack.top();
+                operandStack.pop();
+
+                int result = performOperation(op, operand1, operand2);
+                operandStack.push(result);
+            }
+
+            if (!operatorStack.empty() && operatorStack.top() == '(') {
+                operatorStack.pop();
+            }
+        } else if (isOperator(token[0])) {
+            char currentOp = token[0];
+
+            while (!operatorStack.empty() && getPriority(operatorStack.top()) >= getPriority(currentOp)) {
+                char op = operatorStack.top();
+                operatorStack.pop();
+
+                int operand2 = operandStack.top();
+                operandStack.pop();
+                int operand1 = operandStack.top();
+                operandStack.pop();
+
+                int result = performOperation(op, operand1, operand2);
+                operandStack.push(result);
+            }
+
+            operatorStack.push(currentOp);
+        }
+    }
+
+    while (!operatorStack.empty()) {
+        char op = operatorStack.top();
+        operatorStack.pop();
+
+        int operand2 = operandStack.top();
+        operandStack.pop();
+        int operand1 = operandStack.top();
+        operandStack.pop();
+
+        int result = performOperation(op, operand1, operand2);
+        operandStack.push(result);
+    }
+
+    return operandStack.top();
+}
+
+int main() {
+    setlocale(LC_ALL, "Russian");
+	cout << "Введите арифметическое выражение: ";
+    string expression;
+    getline(cin, expression);
+
+    int result = evaluateExpression(expression);
+    cout << "Результат: " << result << endl;
+
+    return 0;
+}

@@ -1,0 +1,290 @@
+
+#include <iostream>
+#include <vector>
+#include <cstdlib>
+#include <ctime>
+
+using namespace std;
+
+const int BOARD_SIZE = 10;
+
+// Функция для отображения игрового поля
+void displayBoard(const vector<vector<char>>& board) {
+    cout << "  ";
+    for (int i = 0; i < BOARD_SIZE; ++i) {
+        cout << i << " ";
+    }
+    cout << endl;
+
+    for (int i = 0; i < BOARD_SIZE; ++i) {
+        cout << i << " ";
+        for (int j = 0; j < BOARD_SIZE; ++j) {
+            cout << board[i][j] << " ";
+        }
+        cout << endl;
+    }
+}
+
+// Функция для проверки корректности координат
+bool isValidMove(int row, int col) {
+    return row >= 0 && row < BOARD_SIZE&& col >= 0 && col < BOARD_SIZE;
+}
+
+// Функция для размещения кораблей на игровом поле случайным образом
+void placeShipsRandomly(vector<vector<char>>& board) {
+    int shipCount = 0;
+    while (shipCount < 5) {
+        int row = rand() % BOARD_SIZE;
+        int col = rand() % BOARD_SIZE;
+
+        if (board[row][col] == '-') {
+            board[row][col] = 'S';
+            shipCount++;
+        }
+    }
+}
+
+// Функция для размещения кораблей на игровом поле вручную
+void placeShipsManually(vector<vector<char>>& board) {
+    int shipCount = 0;
+    while (shipCount < 5) {
+        int row, col;
+        cout << "Введите координаты для размещения корабля " << shipCount + 1 << ": ";
+        cin >> row >> col;
+
+        if (!isValidMove(row, col)) {
+            cout << "Некорректные координаты!" << endl;
+            continue;
+        }
+
+        if (board[row][col] == '-') {
+            board[row][col] = 'S';
+            shipCount++;
+        }
+        else {
+            cout << "Эта клетка уже занята!" << endl;
+        }
+    }
+}
+
+// Функция для размещения кораблей на игровом поле за игрока компьютером
+void placeShipsForPlayer(vector<vector<char>>& board) {
+    cout << "Расстановка кораблей игроком:" << endl;
+    cout << "-----------------------------" << endl;
+    placeShipsManually(board);
+}
+
+// Функция для размещения кораблей на игровом поле за компьютера
+void placeShipsForComputer(vector<vector<char>>& board) {
+    cout << "Расстановка кораблей компьютером:" << endl;
+    cout << "-------------------------------" << endl;
+    placeShipsRandomly(board);
+}
+
+// Функция для игрового процесса между игроком и компьютером (случайный выстрел компьютера)
+void playGameHumanVsComputer(vector<vector<char>>& playerBoard, vector<vector<char>>& computerBoard) {
+    int playerShipsRemaining = 5;
+    int computerShipsRemaining = 5;
+    int playerAttempts = 0;
+
+    while (playerShipsRemaining > 0 && computerShipsRemaining > 0) {
+        int row, col;
+        cout << "Ход игрока:" << endl;
+        cout << "Введите координаты выстрела (строка столбец): ";
+        cin >> row >> col;
+
+        if (!isValidMove(row, col)) {
+            cout << "Некорректные координаты!" << endl;
+            continue;
+        }
+
+        if (computerBoard[row][col] == 'S') {
+            cout << "Попадание!" << endl;
+            computerBoard[row][col] = 'X';
+            playerShipsRemaining--;
+        }
+        else if (computerBoard[row][col] == '-') {
+            cout << "Мимо!" << endl;
+            computerBoard[row][col] = 'O';
+        }
+        else {
+            cout << "Вы уже стреляли в эту клетку!" << endl;
+            continue;
+        }
+
+        playerAttempts++;
+        displayBoard(computerBoard);
+        cout << "Осталось кораблей у игрока: " << playerShipsRemaining << endl;
+        cout << "------------------------------------" << endl;
+
+        if (playerShipsRemaining <= 0) {
+            break;
+        }
+
+        cout << "Ход компьютера:" << endl;
+        while (true) {
+            row = rand() % BOARD_SIZE;
+            col = rand() % BOARD_SIZE;
+
+влад Крутой, [25.05.2023 13:22]
+if (playerBoard[row][col] == 'S') {
+                cout << "Попадание!" << endl;
+                playerBoard[row][col] = 'X';
+                computerShipsRemaining--;
+                break;
+            }
+            else if (playerBoard[row][col] == '-') {
+                cout << "Мимо!" << endl;
+                playerBoard[row][col] = 'O';
+                break;
+            }
+        }
+
+        displayBoard(playerBoard);
+        cout << "Осталось кораблей у компьютера: " << computerShipsRemaining << endl;
+        cout << "------------------------------------" << endl;
+    }
+
+    if (playerShipsRemaining <= 0) {
+        cout << "Компьютер победил!" << endl;
+    }
+    else {
+        cout << "Игрок победил!" << endl;
+    }
+
+    cout << "Количество попыток игрока: " << playerAttempts << endl;
+}
+
+// Функция для игрового процесса между компьютерами (интеллектуальная игра компьютера)
+void playGameComputerVsComputer(vector<vector<char>>& board1, vector<vector<char>>& board2) {
+    int shipsRemaining1 = 5;
+    int shipsRemaining2 = 5;
+    int attempts1 = 0;
+    int attempts2 = 0;
+
+    while (shipsRemaining1 > 0 && shipsRemaining2 > 0) {
+        int row, col;
+
+        // Ход компьютера 1
+        cout << "Ход компьютера 1:" << endl;
+        while (true) {
+            row = rand() % BOARD_SIZE;
+            col = rand() % BOARD_SIZE;
+
+            if (board2[row][col] == 'S') {
+                cout << "Попадание!" << endl;
+                board2[row][col] = 'X';
+                shipsRemaining2--;
+                break;
+            }
+            else if (board2[row][col] == '-') {
+                cout << "Мимо!" << endl;
+                board2[row][col] = 'O';
+                break;
+            }
+        }
+
+        attempts1++;
+        displayBoard(board2);
+        cout << "Осталось кораблей у компьютера 2: " << shipsRemaining2 << endl;
+        cout << "------------------------------------" << endl;
+
+        if (shipsRemaining2 <= 0) {
+            break;
+        }
+
+        // Ход компьютера 2
+        cout << "Ход компьютера 2:" << endl;
+        while (true) {
+            row = rand() % BOARD_SIZE;
+            col = rand() % BOARD_SIZE;
+
+            if (board1[row][col] == 'S') {
+                cout << "Попадание!" << endl;
+                board1[row][col] = 'X';
+                shipsRemaining1--;
+                break;
+            }
+            else if (board1[row][col] == '-') {
+                cout << "Мимо!" << endl;
+                board1[row][col] = 'O';
+                break;
+            }
+        }
+
+        attempts2++;
+        displayBoard(board1);
+        cout << "Осталось кораблей у компьютера 1: " << shipsRemaining1 << endl;
+        cout << "------------------------------------" << endl;
+    }
+
+    if (shipsRemaining1 <= 0 && shipsRemaining2 <= 0) {
+        cout << "Ничья!" << endl;
+    }
+    else if (shipsRemaining1 <= 0) {
+        cout << "Компьютер 2 победил!" << endl;
+    }
+    else {
+        cout << "Компьютер 1 победил!" << endl;
+    }
+
+    cout << "Количество попыток компьютера 1: " << attempts1 << endl;
+    cout << "Количество попыток компьютера 2: " << attempts2 << endl;
+}
+
+int main() {
+    setlocale(LC_ALL, "Russian");
+    srand(static_cast<unsigned int>(time(0)));
+
+    cout << "Добро пожаловать в игру 'Морской бой'!" << endl;
+    cout << "---------------------------------------" << endl;
+    cout << "Правила игры: " << endl;
+    cout << "Вы должны потопить все корабли на игровом поле " << BOARD_SIZE << "x" << BOARD_SIZE << "." << endl;
+    cout << "Корабли размещаются случайным образом или могут быть расставлены вручную." << endl;
+    cout << "Выстрелы производятся путем ввода координат в формате 'строка столбец'." << endl;
+    cout << "Удачи!" << endl;
+    cout << "-------------------------------" << endl;
+
+    vector<vector<char>> playerBoard(BOARD_SIZE, vector<char>(BOARD_SIZE, '-'));
+    vector<vector<char>> computerBoard(BOARD_SIZE, vector<char>(BOARD_SIZE, '-'));
+
+влад Крутой, [25.05.2023 13:22]
+int mode;
+    cout << "Выберите режим игры:" << endl;
+    cout << "1. Человек против компьютера" << endl;
+    cout << "2. Компьютер против компьютера" << endl;
+    cin >> mode;
+
+    if (mode == 1) {
+        int placementMode;
+        cout << "Выберите режим расстановки кораблей:" << endl;
+        cout << "1. Игрок расставляет вручную" << endl;
+        cout << "2. Компьютер расставляет за игрока" << endl;
+        cin >> placementMode;
+
+        if (placementMode == 1) {
+            placeShipsForPlayer(playerBoard);
+        }
+        else {
+            placeShipsForComputer(playerBoard);
+        }
+
+        placeShipsRandomly(computerBoard);
+        displayBoard(playerBoard);
+        cout << "Игровое поле компьютера готово!" << endl;
+        cout << "-------------------------------" << endl;
+
+        playGameHumanVsComputer(playerBoard, computerBoard);
+    }
+    else {
+        placeShipsRandomly(playerBoard);
+        placeShipsRandomly(computerBoard);
+        displayBoard(playerBoard);
+        cout << "Игровые поля компьютеров готовы!" << endl;
+        cout << "-------------------------------" << endl;
+
+        playGameComputerVsComputer(playerBoard, computerBoard);
+    }
+
+    return 0;
+}
